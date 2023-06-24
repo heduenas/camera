@@ -3,8 +3,10 @@ const intervalSelect = document.getElementById('interval');
 const captureButton = document.getElementById('capture');
 const stopButton = document.getElementById('stop');
 const countdownDiv = document.getElementById('countdown');
-let timerId = null;
+let timer = null;
 let countdownTimer = null;
+let gif = null;
+let wakeLock = null;
 
 // Get access to camera
 navigator.mediaDevices.getUserMedia({ 
@@ -22,8 +24,8 @@ navigator.mediaDevices.getUserMedia({
 });
 
 // Capture photo at selected interval
-captureButton.addEventListener('click', () => {
-  if (timerId === null) {
+captureButton.addEventListener('click', async () => {
+  if (timer === null) {
     const interval = parseInt(intervalSelect.value);
     let countdown = interval / 1000;
     countdownDiv.innerText = `Next photo in ${countdown} seconds`;
@@ -32,17 +34,8 @@ captureButton.addEventListener('click', () => {
       countdownDiv.innerText = `Next photo in ${countdown} seconds`;
     }, 1000);
 
-    const captureFrame = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-      gif.addFrame(canvas, { delay: interval });
-
-      timerId = requestAnimationFrame(captureFrame);
-    };
-
-    const gif = new GIF({
+    // Initialize gif instance
+    gif = new GIF({
       workerScript: "./gif.worker.js",
       workers: 2,
       quality: 10,
@@ -50,41 +43,62 @@ captureButton.addEventListener('click', () => {
       height: video.videoHeight
     });
 
-    timerId = requestAnimationFrame(captureFrame);
+    // Request a wake lock
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (error) {
+      console.error('Could not request wake lock:', error);
+    }
+
+    timer = setInterval(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      gif.addFrame(canvas, { delay: interval });
+
+      countdown = interval / 1000;
+    }, interval);
   }
 });
 
 // Stop capturing photos and download the gif
-stopButton.addEventListener('click', () => {
+stopButton.addEventListener('click', async () => {
+  clearInterval(timer);
   clearInterval(countdownTimer);
+  timer = null;
+  countdownTimer = null;
   countdownDiv.innerText = '';
 
-  if (timerId !== null) {
-    cancelAnimationFrame(timerId);
+  gif.on('finished', (blob) => {
+    const link = document.createElement('a');
+    link.download = 'animation.gif';
+    link.href = URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
 
-    gif.on('finished', (blob) => {
-      const link = document.createElement('a');
-      link.download = 'animation.gif';
-      link.href = URL.createObjectURL(blob);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
+  gif.render();
 
-    gif.render();
-
-    timerId = null;
+  // Release the wake lock
+  if (wakeLock !== null) {
+    await wakeLock.release();
+    wakeLock = null;
   }
 });
 
 // Stop capturing photos
-stopButton.addEventListener('click', () => {
+stopButton.addEventListener('click', async () => {
+  clearInterval(timer);
   clearInterval(countdownTimer);
+  timer = null;
+  countdownTimer = null;
   countdownDiv.innerText = '';
 
-  if (timerId !== null) {
-    cancelAnimationFrame(timerId);
-
-    timerId = null;
+  // Release the wake lock
+  if (wakeLock !== null) {
+    await wakeLock.release();
+    wakeLock = null;
   }
 });
