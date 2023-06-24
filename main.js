@@ -8,15 +8,19 @@ let countdownTimer = null;
 let gif = null;
 
 // Get access to camera
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => {
-    video.srcObject = stream;
-    video.play();
-  })
-  .catch(error => {
-    console.error('Error accessing camera:', error);
-    alert("in mozilla developer go to `about:config` set to `true` `media.devices.insecure.enabled` and `media.getusermedia.insecure.enabled`");
-  });
+navigator.mediaDevices.getUserMedia({ 
+  video: { 
+    facingMode: 'environment' 
+  } 
+})
+.then(stream => {
+  video.srcObject = stream;
+  video.play();
+})
+.catch(error => {
+  console.error('Error accessing camera:', error);
+  alert("in mozilla developer go to `about:config` set to `true` `media.devices.insecure.enabled` and `media.getusermedia.insecure.enabled`");
+});
 
 // Capture photo at selected interval
 captureButton.addEventListener('click', () => {
