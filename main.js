@@ -6,6 +6,7 @@ const countdownDiv = document.getElementById('countdown');
 let timer = null;
 let countdownTimer = null;
 let gif = null;
+let wakeLock = null;
 
 // Get access to camera
 navigator.mediaDevices.getUserMedia({ 
@@ -23,7 +24,7 @@ navigator.mediaDevices.getUserMedia({
 });
 
 // Capture photo at selected interval
-captureButton.addEventListener('click', () => {
+captureButton.addEventListener('click', async () => {
   if (timer === null) {
     const interval = parseInt(intervalSelect.value);
     let countdown = interval / 1000;
@@ -42,6 +43,13 @@ captureButton.addEventListener('click', () => {
       height: video.videoHeight
     });
 
+    // Request a wake lock
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (error) {
+      console.error('Could not request wake lock:', error);
+    }
+
     timer = setInterval(() => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -55,7 +63,7 @@ captureButton.addEventListener('click', () => {
 });
 
 // Stop capturing photos and download the gif
-stopButton.addEventListener('click', () => {
+stopButton.addEventListener('click', async () => {
   clearInterval(timer);
   clearInterval(countdownTimer);
   timer = null;
@@ -72,13 +80,25 @@ stopButton.addEventListener('click', () => {
   });
 
   gif.render();
+
+  // Release the wake lock
+  if (wakeLock !== null) {
+    await wakeLock.release();
+    wakeLock = null;
+  }
 });
 
 // Stop capturing photos
-stopButton.addEventListener('click', () => {
+stopButton.addEventListener('click', async () => {
   clearInterval(timer);
   clearInterval(countdownTimer);
   timer = null;
   countdownTimer = null;
   countdownDiv.innerText = '';
+
+  // Release the wake lock
+  if (wakeLock !== null) {
+    await wakeLock.release();
+    wakeLock = null;
+  }
 });
