@@ -42,3 +42,18 @@ body {
     font-size: 24px;
     margin-bottom: 20px;
   }
+
+  /* Define columns */
+  .column {
+    float: left;
+    width: 50%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  /* Clear floats */
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
