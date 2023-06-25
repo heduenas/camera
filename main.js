@@ -61,7 +61,7 @@ captureButton.addEventListener('click', async () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-      gif.addFrame(canvas, { delay: interval });
+      gif.addFrame(canvas, { delay: 500 }); // 0.5 second delay between frames.
 
       countdown = interval / 1000;
     }, interval);
