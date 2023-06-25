@@ -17,7 +17,7 @@ body {
     display: block;
     margin: 20px auto;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 70pt;
     border-radius: 5px;
     border: none;
     background-color: #4CAF50;
@@ -27,6 +27,8 @@ body {
   
   #stop {
     background-color: #f44336;
+    font-size: 45pt;
+    visibility: hidden;
   }
   
   select {

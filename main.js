@@ -9,12 +9,12 @@ let gif = null;
 let wakeLock = null;
 
 // Get access to camera
-navigator.mediaDevices.getUserMedia({ 
-  video: { 
-    facingMode: 'environment' ,
+navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: 'environment',
     width: { ideal: 854 },
     height: { ideal: 480 },
-  } 
+  }
 })
 .then(stream => {
   video.srcObject = stream;
@@ -28,6 +28,10 @@ navigator.mediaDevices.getUserMedia({
 // Capture photo at selected interval
 captureButton.addEventListener('click', async () => {
   if (timer === null) {
+    // Hide the capture button and show the stop button
+    captureButton.style.visibility = 'hidden';
+    stopButton.style.visibility = 'visible';
+
     const interval = parseInt(intervalSelect.value);
     let countdown = interval / 1000;
     countdownDiv.innerText = `Next photo in ${countdown} seconds`;
@@ -66,6 +70,10 @@ captureButton.addEventListener('click', async () => {
 
 // Stop capturing photos and download the gif
 stopButton.addEventListener('click', async () => {
+  // Hide the stop button and show the capture button
+  stopButton.style.visibility = 'hidden';
+  captureButton.style.visibility = 'visible';
+
   clearInterval(timer);
   clearInterval(countdownTimer);
   timer = null;
@@ -82,21 +90,6 @@ stopButton.addEventListener('click', async () => {
   });
 
   gif.render();
-
-  // Release the wake lock
-  if (wakeLock !== null) {
-    await wakeLock.release();
-    wakeLock = null;
-  }
-});
-
-// Stop capturing photos
-stopButton.addEventListener('click', async () => {
-  clearInterval(timer);
-  clearInterval(countdownTimer);
-  timer = null;
-  countdownTimer = null;
-  countdownDiv.innerText = '';
 
   // Release the wake lock
   if (wakeLock !== null) {
