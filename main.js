@@ -11,7 +11,9 @@ let wakeLock = null;
 // Get access to camera
 navigator.mediaDevices.getUserMedia({ 
   video: { 
-    facingMode: 'environment' 
+    facingMode: 'environment' ,
+    width: { ideal: 854 },
+    height: { ideal: 480 },
   } 
 })
 .then(stream => {
