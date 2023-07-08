@@ -4,6 +4,7 @@ const captureButton = document.getElementById('capture');
 const stopButton = document.getElementById('stop');
 const countdownDiv = document.getElementById('countdown');
 const snapSound = new Audio('snap.mp3'); // Load the audio file
+const makeSoundCheckbox = document.getElementById('make-sound');
 let timer = null;
 let countdownTimer = null;
 let gif = null;
@@ -63,7 +64,9 @@ captureButton.addEventListener('click', async () => {
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       gif.addFrame(canvas, { delay: 500 }); // 0.5 second delay between frames.
-      snapSound.play(); // Play the sound
+      if (makeSoundCheckbox.checked) {
+          snapSound.play();
+      }
 
       countdown = interval / 1000;
     }, interval);
