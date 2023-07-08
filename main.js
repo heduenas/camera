@@ -82,6 +82,11 @@ stopButton.addEventListener('click', async () => {
   countdownTimer = null;
   countdownDiv.innerText = '';
 
+  gif.on('progress', (progress) => {
+    // Update the inner text of the countdownDiv
+    countdownDiv.innerText = `Generating GIF... ${Math.round(progress * 100)}%`;
+  });
+  
   gif.on('finished', (blob) => {
     const link = document.createElement('a');
     link.download = 'animation.gif';
